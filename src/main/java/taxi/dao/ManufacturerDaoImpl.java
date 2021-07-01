@@ -8,6 +8,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import taxi.lib.Dao;
 import taxi.lib.exception.DataProcessingException;
 import taxi.model.Manufacturer;
@@ -15,8 +17,11 @@ import taxi.util.ConnectionUtil;
 
 @Dao
 public class ManufacturerDaoImpl implements ManufacturerDao {
+    private static final Logger logger = LogManager.getLogger(CarDaoImpl.class);
+
     @Override
     public Manufacturer create(Manufacturer manufacturer) {
+        logger.info("create method was called");
         String query = "INSERT INTO manufacturers (name, country) VALUES (?,?)";
         try (Connection connection = ConnectionUtil.getConnection();
                  PreparedStatement preparedStatement
@@ -26,8 +31,11 @@ public class ManufacturerDaoImpl implements ManufacturerDao {
             if (resultSet.next()) {
                 manufacturer.setId(resultSet.getObject(1, Long.class));
             }
+            logger.info("create method was executed");
             return manufacturer;
         } catch (SQLException throwable) {
+            logger.error("Couldn't create manufacturer. " + manufacturer + " ",
+                    throwable);
             throw new DataProcessingException("Couldn't create manufacturer. " + manufacturer + " ",
                     throwable);
         }
@@ -35,6 +43,7 @@ public class ManufacturerDaoImpl implements ManufacturerDao {
 
     @Override
     public Optional<Manufacturer> get(Long id) {
+        logger.info("get method was called");
         String query = "SELECT * FROM manufacturers WHERE id = ? AND deleted = FALSE";
         try (Connection connection = ConnectionUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -44,8 +53,11 @@ public class ManufacturerDaoImpl implements ManufacturerDao {
             if (resultSet.next()) {
                 manufacturer = setManufacturer(resultSet);
             }
+            logger.info("get method was executed");
             return Optional.ofNullable(manufacturer);
         } catch (SQLException throwable) {
+            logger.error("Couldn't get manufacturer by id " + id + " ",
+                    throwable);
             throw new DataProcessingException("Couldn't get manufacturer by id " + id + " ",
                     throwable);
         }
@@ -53,6 +65,7 @@ public class ManufacturerDaoImpl implements ManufacturerDao {
 
     @Override
     public List<Manufacturer> getAll() {
+        logger.info("getAll method was called");
         String query = "SELECT * FROM manufacturers WHERE deleted = FALSE";
         try (Connection connection = ConnectionUtil.getConnection();
                 Statement statement = connection.createStatement()) {
@@ -61,8 +74,12 @@ public class ManufacturerDaoImpl implements ManufacturerDao {
             while (resultSet.next()) {
                 manufacturers.add(setManufacturer(resultSet));
             }
+            logger.info("getAll method was executed");
             return manufacturers;
         } catch (SQLException throwable) {
+            logger.error("Couldn't get a list of manufacturers "
+                            + "from manufacturers table. ",
+                    throwable);
             throw new DataProcessingException("Couldn't get a list of manufacturers "
                     + "from manufacturers table. ",
                     throwable);
@@ -71,6 +88,7 @@ public class ManufacturerDaoImpl implements ManufacturerDao {
 
     @Override
     public Manufacturer update(Manufacturer manufacturer) {
+        logger.info("update method was called");
         String query = "UPDATE manufacturers SET name = ?, country = ?"
                 + " WHERE id = ? AND deleted = FALSE";
         try (Connection connection = ConnectionUtil.getConnection();
@@ -78,8 +96,11 @@ public class ManufacturerDaoImpl implements ManufacturerDao {
                         = setUpdate(connection.prepareStatement(query), manufacturer)) {
             preparedStatement.setLong(3, manufacturer.getId());
             preparedStatement.executeUpdate();
+            logger.info("update method was executed");
             return manufacturer;
         } catch (SQLException throwable) {
+            logger.error("Couldn't update a manufacturer "
+                    + manufacturer + " ", throwable);
             throw new DataProcessingException("Couldn't update a manufacturer "
                     + manufacturer + " ", throwable);
         }
@@ -87,12 +108,16 @@ public class ManufacturerDaoImpl implements ManufacturerDao {
 
     @Override
     public boolean delete(Long id) {
+        logger.info("delete method was called");
         String query = "UPDATE manufacturers SET deleted = TRUE WHERE id = ?";
         try (Connection connection = ConnectionUtil.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setLong(1, id);
+            logger.info("delete method was executed");
             return preparedStatement.executeUpdate() > 0;
         } catch (SQLException throwable) {
+            logger.error("Couldn't delete a manufacturer by id " + id + " ",
+                    throwable);
             throw new DataProcessingException("Couldn't delete a manufacturer by id " + id + " ",
                     throwable);
         }
