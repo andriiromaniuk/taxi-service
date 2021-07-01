@@ -1,4 +1,4 @@
-#Taxi Service
+# Taxi Service
 ____
 This application may be used by taxi companies that want to organize the list of available cars and drivers that are assigned to them.
 
@@ -20,7 +20,7 @@ After those steps you have possibilites to:
 
 For menu to show up use browser to send /index request to your server after logging in.
 
-##Tecnhologies used in project
+## Tecnhologies used in project
 ____
 - JDBC
 - MySQL Server 8.0.25
